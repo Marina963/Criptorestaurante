@@ -2,18 +2,23 @@ import pick
 import sqlite3 as sl
 import time
 import re
+import streamlit as st
 
 base = sl.connect("Base_datos.db")
 bd = base.cursor()
 bd.execute("PRAGMA foreign_keys=on")
 
-registro = ['Crear cuenta', 'Iniciar sesion']
-opcion, llave = pick.pick(registro, "¿Que desea hacer?: ", indicator="=>")
+#registro = ['Crear cuenta', 'Iniciar sesion']
+#opcion, llave = pick.pick(registro, "¿Que desea hacer?: ", indicator="=>")
+
 
 iniciado, create, redirige, reservado, disponible = False, False, False, False, False
 
+
+
 if opcion == 'Crear cuenta':
     while not create:
+
         usuario = input('Introduce su nuevo nombre de usuario:')
         bd.execute("SELECT usuario FROM user WHERE usuario=?", (usuario,))
         usua = bd.fetchall()
