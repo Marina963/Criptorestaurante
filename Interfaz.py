@@ -1,7 +1,7 @@
 import sqlite3 as sl
-import time
 import re
 import streamlit as st
+from streamlit_extras.switch_page_button import switch_page
 
 
 
@@ -13,7 +13,7 @@ opcion = False
 iniciado, create, redirige, reservado, disponible = False, False, False, False, False
 
 
-opcion = st.sidebar.radio("¿Que desea hacer?:", ['Crear cuenta', 'Iniciar sesion', 'Reservar'] )
+opcion = st.sidebar.radio("¿Que desea hacer?:", ['Crear cuenta', 'Iniciar sesion'] )
 
 if opcion == 'Crear cuenta':
 
@@ -47,7 +47,7 @@ if opcion == 'Crear cuenta':
                     if contrasena == conf_contrasena:
                         bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?)", (usuario, correo, nombre, apellido, int(telefono), contrasena))
                         create = True
-                        base.commit()
+                        #base.commit()
                         for row in bd.execute("SELECT * FROM user"):
                             st.write(row)
                     else:
@@ -63,27 +63,14 @@ else:
     elif true_cont[0][0] == str(contrasena):
         st.write("bienvenido")
         iniciado = True
+        switch_page("informacion")
     else:
         st.write("Contraseña incorrecta")
 
-if (iniciado or create) :
 
 
-    restaurante = ['Madrid, Calle Mayor, 5', 'Leganes, Calle Sabatini, 10']
-    rest_opcion = st.selectbox("¿Que restaurnate desea visitar?: ", restaurante)
-    #rest_opcion, llave = pick.pick(restaurante, "¿Que restaurnate desea visitar?: ", indicator="=>")
-    bd.execute("SELECT telefono, valoracion, horario_apertura, horario_cerrar FROM restaurante WHERE localizacion=?", (rest_opcion,))
-    datos = bd.fetchall()
-    tel, val, hor_i, hor_c = datos[0][0], datos[0][1], datos[0][2],datos[0][3]
-    st.write(tel, val, hor_i, hor_c)
-    time.sleep(5)
-    reserva = ['Si', 'No']
-    #res_opcion, llave2 = pick.pick(reserva, "¿Desea hacer una reserva?: ", indicator="=>")
-    res_opcion = st.selectbox("¿Desea hacer una reserva?: ", reserva)
 
-    if res_opcion == 'Si':
-        redirige = True
-        st.write("redirige pag reserva")
+
 
 base.close()
 
