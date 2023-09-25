@@ -16,10 +16,10 @@ def info_restaurante():
         (rest_elegido,))
     datos = bd.fetchall()
     tel, val, hor_i, hor_c = datos[0][0], datos[0][1], datos[0][2], datos[0][3]
-    st.write("Telefono:", tel)
-    st.write("Valoracion: ", val)
-    st.write("Hora de apertura: ", hor_i)
-    st.write("Hora de cierre: ", hor_c)
+    st.write("Telefono:", str(tel))
+    st.write("Valoracion: ", str(val))
+    st.write("Hora de apertura: ", str(hor_i))
+    st.write("Hora de cierre: ", str(hor_c))
     reserva = st.button("Reservar")
     if reserva:
         st.session_state["restaurante"] = rest_elegido
