@@ -27,14 +27,9 @@ def info_restaurante():
     base.close()
 
 
-def Cerrar_Sesion():
-    cerrar = st.button("Cerrar sesion")
-    if cerrar:
-        st.session_state["iniciado"] = False
-        st.session_state["create"] = False
 
 
 if __name__ == "__main__":
     info_restaurante()
-    Cerrar_Sesion()
+
 
