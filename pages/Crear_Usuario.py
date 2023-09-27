@@ -2,6 +2,7 @@ import re
 from  Inicio_Sesion import  *
 import os
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+import base64
 
 
 def Crear_Usuario():
@@ -43,12 +44,13 @@ def Crear_Usuario():
                                 r=8,
                                 p=1,
                             )
-                            key = kdf.derive(b"contrasena")
-                            bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?)",
+                            key = kdf.derive(contrasena.encode("UTF-8"))
+                            key = base64.b64encode(key)
+                            key = key.decode("UTF-8")
+                            bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?,?)",
                                        (usuario, correo, nombre, apellido, int(telefono), key, salt))
                             st.session_state["create"] = True
                             st.session_state["usuario"] = usuario
-                            # Crear token
                             base.commit()
                             switch_page("Info_Restaurantes")
                     else:
