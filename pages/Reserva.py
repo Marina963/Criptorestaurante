@@ -15,6 +15,7 @@ def reserva():
         if reg:
             switch_page("Crear_Usuario")
     else:
+        st.write("Esta haciendo una resevapa para el restaurante: ",st.session_state["restaurante"])
         today = datetime.datetime.today()
         fecha = st.date_input(label="Elige una fecha", min_value=today)
         st.write(fecha)
