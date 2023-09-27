@@ -51,8 +51,13 @@ def borrar_tablas():
     bd.execute("DROP TABLE reservas")
     bd.execute("DROP TABLE user")
     bd.execute("DROP TABLE restaurante")
+    base.close()
 
-
+def insertar_restaurantes():
+    base, bd = Abrir_bd()
+    bd.execute("""INSERT INTO restaurante VALUES("Madrid, Calle Mayor, 5", 346898789, 3.5, 10,24 , 30)""")
+    bd.execute("""INSERT INTO restaurante VALUES("Leganes, Calle Sabatini, 10", 276598961, 4, 10,12, 30)""")
+    base.commit()
     base.close()
 
 

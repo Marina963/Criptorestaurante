@@ -27,14 +27,20 @@ def Inicio_Sesion():
                 r=8,
                 p=1,
             )
-            key = key.encode("UTF-8")
+            key = bytes(key,'ascii')
             key = base64.b64decode(key)
-            if kdf.verify(bytes(contrasena), key):
-                st.session_state["iniciado"]= True
-                st.session_state["usuario"]= usuario
-                switch_page("Info_Restaurantes")
-            else:
+
+            try :
+                kdf.verify(bytes(contrasena, 'ascii'), key)
+            except:
                 st.write("Contraseña incorrecta")
+                return
+
+            st.session_state["iniciado"] = True
+            st.session_state["usuario"] = usuario
+            switch_page("Info_Restaurantes")
+
+
     base.close()
 
 
@@ -43,9 +49,11 @@ if __name__ == "__main__":
     st.session_state["create"] = False
     st.session_state["usuario"] = None
     st.session_state["restaurante"] = None
-    borrar_tablas()
-    Crear_tablas()
+    #borrar_tablas()
+    #Crear_tablas()
+    #insertar_restaurantes()
     Inicio_Sesion()
+
 
 
 

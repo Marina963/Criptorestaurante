@@ -44,9 +44,9 @@ def Crear_Usuario():
                                 r=8,
                                 p=1,
                             )
-                            key = kdf.derive(contrasena.encode("UTF-8"))
+                            key = kdf.derive(contrasena.encode('ascii'))
                             key = base64.b64encode(key)
-                            key = key.decode("UTF-8")
+                            key = key.decode('ascii')
                             bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?,?)",
                                        (usuario, correo, nombre, apellido, int(telefono), key, salt))
                             st.session_state["create"] = True
