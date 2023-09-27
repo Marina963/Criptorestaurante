@@ -31,7 +31,7 @@ if __name__ == "__main__":
     st.session_state["usuario"] = None
     st.session_state["restaurante"] = None
     #borrar_tablas()
-    #Crear_tablas()
+    Crear_tablas()
     Inicio_Sesion()
 
 

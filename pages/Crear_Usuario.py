@@ -1,5 +1,7 @@
 import re
 from  Inicio_Sesion import  *
+import os
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 
 def Crear_Usuario():
@@ -31,12 +33,21 @@ def Crear_Usuario():
                     contrasena = st.text_input('Introduzca su contraseña:', type="password")
                     conf_contrasena = st.text_input('Confirme su contraseña:', type="password")
                     if contrasena == conf_contrasena:
-                        bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?)",
-                                   (usuario, correo, nombre, apellido, int(telefono), contrasena))
-                        st.session_state["create"]=True
-                        st.session_state["usuario"] = usuario
                         reg = st.button("Crear cuenta")
                         if reg:
+                            salt = os.urandom(16)
+                            kdf = Scrypt(
+                                salt=salt,
+                                length=32,
+                                n=2 ** 14,
+                                r=8,
+                                p=1,
+                            )
+                            key = kdf.derive(b"contrasena")
+                            bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?)",
+                                       (usuario, correo, nombre, apellido, int(telefono), key, salt))
+                            st.session_state["create"] = True
+                            st.session_state["usuario"] = usuario
                             # Crear token
                             base.commit()
                             switch_page("Info_Restaurantes")
