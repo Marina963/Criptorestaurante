@@ -37,6 +37,7 @@ def Crear_Usuario():
                         st.session_state["usuario"] = usuario
                         reg = st.button("Crear cuenta")
                         if reg:
+                            # Crear token
                             base.commit()
                             switch_page("Info_Restaurantes")
                     else:
