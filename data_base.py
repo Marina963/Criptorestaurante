@@ -14,7 +14,8 @@ def Crear_tablas():
                "apellido VARCHAR(20),"
                "telefono INT(9), "
                "contraseña VARCHAR(30),"
-               "salt BIT(16),"
+               "salt_contr VARCHAR(50),"
+               "salt_clave VARCHAR(50),"
                "PRIMARY KEY(usuario))")
 
     bd.execute( "CREATE TABLE restaurante ("
@@ -29,8 +30,11 @@ def Crear_tablas():
     bd.execute("CREATE TABLE reservas("
                "usuario VARCHAR(20),"
                "localizacion VARCHAR(20),"
+               "non_loc VARCHAR(20),"
                "hora int(2),"
+               "non_hora VARCHAR(20),"
                "fecha date,"
+               "non_fecha VARCHAR(20),"
                "personas int(2),"
                "PRIMARY KEY(usuario, hora, fecha),"
                "FOREIGN KEY(usuario) REFERENCES user(usuario),"

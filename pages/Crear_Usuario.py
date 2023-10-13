@@ -45,14 +45,14 @@ def Crear_Usuario():
                                 p=1,
                             )
                             key = kdf.derive(contrasena.encode('ascii'))
+                            print(type(key))
                             key = base64.b64encode(key)
                             key = key.decode('ascii')
-                            bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?,?)",
-                                       (usuario, correo, nombre, apellido, int(telefono), key, salt))
-                            st.session_state["create"] = True
+                            bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?,?,?)",
+                                       (usuario, correo, nombre, apellido, int(telefono), key, salt, "hola"))
                             st.session_state["usuario"] = usuario
                             base.commit()
-                            switch_page("Info_Restaurantes")
+                            switch_page("Inicio_Sesion")
                     else:
                         st.write("las contraseñas no coinciden")
     base.close()
