@@ -22,6 +22,7 @@ def Inf_Res():
 
 
 
+
         st.write("Reservas: ")
         for i in range (len(datos)):
             restaurante = datos[i][0]

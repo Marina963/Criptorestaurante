@@ -18,6 +18,7 @@ def Crear_tablas():
                "salt_clave VARCHAR(50),"
                "PRIMARY KEY(usuario))")
 
+
     bd.execute( "CREATE TABLE restaurante ("
                 "localizacion VARCHAR(20),"
                 "telefono INT(9),"

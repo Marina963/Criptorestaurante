@@ -3,6 +3,7 @@ import sqlite3 as sl
 
 base = sl.connect("Base_datos.db")
 
+
 bd = base.cursor()
 bd.execute("PRAGMA foreign_keys=on")
 
