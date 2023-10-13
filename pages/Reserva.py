@@ -4,6 +4,8 @@ from Inicio_Sesion import *
 import datetime
 import os
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 def reserva():
     base, bd = Abrir_bd()
@@ -69,23 +71,37 @@ def reserva():
             res_opcion = st.button("Confirma tu reserva: ")
 
             if res_opcion:
+                bd.execute("SELECT salt_clave, contraseña FROM user WHERE usuario=?",
+                           (st.session_state["usuario"],))
+                datos = bd.fetchall()
+                salt_clave, contrasena = datos[0][0], datos[0][1]
+
+                kdf = PBKDF2HMAC(
+                    algorithm=hashes.SHA256(),
+                    length=32,
+                    salt=salt_clave,
+                    iterations=480000,
+                )
+                #key_clave = kdf.derive(key.encode('ascii'))
+                #key_clave = base64.b64encode(key_clave)
+                #key_clave = key_clave.decode('ascii')
+
+                aad = None
+                key = kdf.derive(contrasena.encode('ascii'))
+                chacha = ChaCha20Poly1305(key)
+
                 fecha = str(fecha)
                 data_f = bytes(fecha.encode('ascii'))
-                aad = None
-                key = ChaCha20Poly1305.generate_key()
-                chacha = ChaCha20Poly1305(key)
                 non_f = os.urandom(12)
                 ct_f = chacha.encrypt(non_f, data_f, aad)
 
                 hora_opcion = str(hora_opcion)
                 data_h = bytes(hora_opcion.encode('ascii'))
-                aad = None
-                key = ChaCha20Poly1305.generate_key()
-                chacha = ChaCha20Poly1305(key)
                 non_h = os.urandom(12)
                 ct_h = chacha.encrypt(non_h, data_h, aad)
 
                 rest = st.session_state["restaurante"]
+                '''         
                 data_r = bytes(rest.encode('ascii'))
                 aad = None
                 key = ChaCha20Poly1305.generate_key()
@@ -100,6 +116,7 @@ def reserva():
 
                 ct_r = base64.b64encode(ct_r)
                 ct_r = ct_r.decode('ascii')
+                '''
 
                 ct_h = base64.b64encode(ct_h)
                 ct_h = ct_h.decode('ascii')
@@ -121,6 +138,9 @@ def reserva():
 
                 base.commit()
                 switch_page("Info_Restaurantes")
+
+
+
     base.close()
 
 if __name__ == "__main__":

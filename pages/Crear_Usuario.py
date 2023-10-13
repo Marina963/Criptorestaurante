@@ -3,6 +3,8 @@ from  Inicio_Sesion import  *
 import os
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 import base64
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
 def Crear_Usuario():
@@ -48,11 +50,31 @@ def Crear_Usuario():
                             print(type(key))
                             key = base64.b64encode(key)
                             key = key.decode('ascii')
+
+                            # Salts should be randomly generated
+                            salt_clave = os.urandom(16)
+                            # derive
+                            kdf = PBKDF2HMAC(
+                                algorithm=hashes.SHA256(),
+                                length=32,
+                                salt=salt_clave,
+                                iterations=480000,
+                            )
+                            key_clave = kdf.derive(key.encode('ascii'))
+                            key_clave = base64.b64encode(key_clave)
+                            key_clave = key_clave.decode('ascii')
+
                             bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?,?,?)",
-                                       (usuario, correo, nombre, apellido, int(telefono), key, salt, "hola"))
+                                       (usuario, correo, nombre, apellido, int(telefono), key, salt, salt_clave))
                             st.session_state["usuario"] = usuario
                             base.commit()
                             switch_page("Inicio_Sesion")
+
+
+
+
+
+
                     else:
                         st.write("las contraseñas no coinciden")
     base.close()
