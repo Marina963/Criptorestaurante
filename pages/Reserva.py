@@ -1,11 +1,6 @@
-import time
-
 from Inicio_Sesion import *
 import datetime
-import os
-from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
 
 def reserva():
     base, bd = Abrir_bd()
@@ -61,7 +56,7 @@ def reserva():
                 st.write("Aforo insuficiente")
             else:
                 bd.execute(
-                    "UPDATE aforo set AFORO = ? WHERE localizacion=? and hora = ? and fecha= ?", (
+                    "UPDATE aforo set ocupacion = ? WHERE localizacion=? and hora = ? and fecha= ?", (
                         n_per, st.session_state["restaurante"], hora_opcion, fecha))
                 disponible = True
 
@@ -71,64 +66,18 @@ def reserva():
             res_opcion = st.button("Confirma tu reserva: ")
 
             if res_opcion:
-                bd.execute("SELECT salt_clave, contraseña FROM user WHERE usuario=?",
-                           (st.session_state["usuario"],))
-                datos = bd.fetchall()
-                salt_clave, contrasena = datos[0][0], datos[0][1]
 
-                kdf = PBKDF2HMAC(
-                    algorithm=hashes.SHA256(),
-                    length=32,
-                    salt=salt_clave,
-                    iterations=480000,
-                )
-                #key_clave = kdf.derive(key.encode('ascii'))
-                #key_clave = base64.b64encode(key_clave)
-                #key_clave = key_clave.decode('ascii')
+                chacha = ChaCha20Poly1305(st.session_state["contrasena"])
 
-                aad = None
-                key = kdf.derive(contrasena.encode('ascii'))
-                chacha = ChaCha20Poly1305(key)
-
-                fecha = str(fecha)
-                data_f = bytes(fecha.encode('ascii'))
-                non_f = os.urandom(12)
-                ct_f = chacha.encrypt(non_f, data_f, aad)
-
-                hora_opcion = str(hora_opcion)
-                data_h = bytes(hora_opcion.encode('ascii'))
-                non_h = os.urandom(12)
-                ct_h = chacha.encrypt(non_h, data_h, aad)
-
-                rest = st.session_state["restaurante"]
-                '''         
-                data_r = bytes(rest.encode('ascii'))
-                aad = None
-                key = ChaCha20Poly1305.generate_key()
-                chacha = ChaCha20Poly1305(key)
-                non_r = os.urandom(12)
-                ct_r = chacha.encrypt(non_r, data_r, aad)
+                ct_f, non_f = chacha_encri(chacha, fecha)
+                ct_h, non_h = chacha_encri(chacha, hora_opcion)
 
 
-                non_r = base64.b64encode(non_r)
-                non_r = non_r.decode('ascii')
-                print("1")
+                ct_h = codificar(ct_h)
+                ct_f = codificar(ct_f)
+                non_f = codificar(non_f)
+                non_h = codificar(non_h)
 
-                ct_r = base64.b64encode(ct_r)
-                ct_r = ct_r.decode('ascii')
-                '''
-
-                ct_h = base64.b64encode(ct_h)
-                ct_h = ct_h.decode('ascii')
-
-                ct_f = base64.b64encode(ct_f)
-                ct_f = ct_f.decode('ascii')
-
-                non_f = base64.b64encode(non_f)
-                non_f = non_f.decode('ascii')
-
-                non_h = base64.b64encode(non_h)
-                non_h = non_h.decode('ascii')
 
                 st.write("Reserva confirmada")
 
@@ -142,6 +91,10 @@ def reserva():
 
 
     base.close()
+
+
+
+
 
 if __name__ == "__main__":
     reserva()

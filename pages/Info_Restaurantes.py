@@ -3,8 +3,6 @@ from Inicio_Sesion import  *
 def info_restaurante():
     base, bd = Abrir_bd()
     st.title("Página de información")
-
-
     bd.execute("SELECT localizacion FROM restaurante")
     restaurant = bd.fetchall()
     lista_rest = []

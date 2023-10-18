@@ -31,7 +31,6 @@ def Crear_tablas():
     bd.execute("CREATE TABLE reservas("
                "usuario VARCHAR(20),"
                "localizacion VARCHAR(20),"
-               "non_loc VARCHAR(20),"
                "hora int(2),"
                "non_hora VARCHAR(20),"
                "fecha date,"

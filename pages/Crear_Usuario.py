@@ -1,11 +1,6 @@
 import re
 from  Inicio_Sesion import  *
 import os
-from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
-import base64
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-
 
 def Crear_Usuario():
     base, bd = Abrir_bd()
@@ -38,31 +33,17 @@ def Crear_Usuario():
                     if contrasena == conf_contrasena:
                         reg = st.button("Crear cuenta")
                         if reg:
+                            #Autentificacion de contraseñas
                             salt = os.urandom(16)
-                            kdf = Scrypt(
-                                salt=salt,
-                                length=32,
-                                n=2 ** 14,
-                                r=8,
-                                p=1,
-                            )
+                            kdf = kdf_crear(salt)
                             key = kdf.derive(contrasena.encode('ascii'))
-                            print(type(key))
-                            key = base64.b64encode(key)
-                            key = key.decode('ascii')
+                            key = codificar(key)
+                            salt = codificar(salt)
 
-                            # Salts should be randomly generated
+                            #Cifrado - autentificado
                             salt_clave = os.urandom(16)
-                            # derive
-                            kdf = PBKDF2HMAC(
-                                algorithm=hashes.SHA256(),
-                                length=32,
-                                salt=salt_clave,
-                                iterations=480000,
-                            )
-                            key_clave = kdf.derive(key.encode('ascii'))
-                            key_clave = base64.b64encode(key_clave)
-                            key_clave = key_clave.decode('ascii')
+                            salt_clave = codificar(salt_clave)
+
 
                             bd.execute("INSERT INTO user VALUES(?,?,?,?,?,?,?,?)",
                                        (usuario, correo, nombre, apellido, int(telefono), key, salt, salt_clave))
@@ -70,14 +51,12 @@ def Crear_Usuario():
                             base.commit()
                             switch_page("Inicio_Sesion")
 
-
-
-
-
-
                     else:
                         st.write("las contraseñas no coinciden")
     base.close()
+
+
+
 
 if __name__ == "__main__":
     Crear_Usuario()

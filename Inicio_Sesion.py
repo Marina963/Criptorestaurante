@@ -1,15 +1,13 @@
 from data_base import  *
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
-import os
-from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
-import base64
+from criptografia import  *
 
 def Inicio_Sesion():
     base, bd = Abrir_bd()
     usuario = st.text_input('Introduzca su usuario:')
     contrasena = st.text_input('Introduce su contraseña:', type="password")
-    bd.execute("SELECT contraseña, salt_contr FROM user WHERE usuario=?", (usuario,))
+    bd.execute("SELECT contraseña, salt_contr, salt_clave FROM user WHERE usuario=?", (usuario,))
     true_cont = bd.fetchall()
     login = st.button("Inicio Sesion")
     crear_usuario = st.button("Crea tu cuenta")
@@ -20,15 +18,9 @@ def Inicio_Sesion():
             st.write("Usuario no existe")
         else:
             key, salt = true_cont[0][0], true_cont[0][1]
-            kdf = Scrypt(
-                salt=salt,
-                length=32,
-                n=2 ** 14,
-                r=8,
-                p=1,
-            )
-            key = bytes(key,'ascii')
-            key = base64.b64decode(key)
+            salt = decodificar(salt)
+            kdf = kdf_crear(salt)
+            key = decodificar(key)
 
             try :
                 kdf.verify(bytes(contrasena, 'ascii'), key)
@@ -36,10 +28,12 @@ def Inicio_Sesion():
                 st.write("Contraseña incorrecta")
                 return
 
+            salt_clave= true_cont[0][2]
+            salt_clave = decodificar(salt_clave)
             st.session_state["iniciado"] = True
             st.session_state["usuario"] = usuario
+            st.session_state["contrasena"] = key_f(contrasena, salt_clave)
             switch_page("Info_Restaurantes")
-
 
     base.close()
 
@@ -48,6 +42,7 @@ if __name__ == "__main__":
     st.session_state["iniciado"] = False
     st.session_state["usuario"] = None
     st.session_state["restaurante"] = None
+    st.session_state["contrasena"] = None
     #borrar_tablas()
     #Crear_tablas()
     #insertar_restaurantes()
