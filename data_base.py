@@ -1,4 +1,8 @@
 import sqlite3 as sl
+
+
+#Archivo donde están los métodos de creación de las bases de datos
+
 def Abrir_bd():
     base = sl.connect("Base_datos.db")
     bd = base.cursor()

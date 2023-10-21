@@ -1,7 +1,7 @@
 from Inicio_Sesion import *
 import datetime
 
-
+#Paguina que permite hacer una reserva al usuario
 def reserva():
     base, bd = Abrir_bd()
 
@@ -14,7 +14,11 @@ def reserva():
         if reg:
             switch_page("Crear_Usuario")
     else:
-        st.write("Esta haciendo una resevapa para el restaurante: ",st.session_state["restaurante"])
+        if st.session_state["restaurante"] is None:
+            st.session_state["restaurante"] = "Madrid, Calle Mayor, 5"
+
+        #Da la opción de elegir la hora, el número de personas y la fecha en la que quiere reservar
+        st.write("Esta haciendo una reserva para el restaurante: ",st.session_state["restaurante"])
         today = datetime.datetime.today()
         fecha = st.date_input(label="Elige una fecha", min_value=today)
         st.write(fecha)
@@ -29,10 +33,11 @@ def reserva():
             hora_a += 1
         personas = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         pers_opcion = st.selectbox("¿Para cuantas personas es la reserva?: ", personas)
-        hora_opcion = st.selectbox("eleccione una hora: ", horas)
+        hora_opcion = st.selectbox("Seleccione una hora: ", horas)
 
         hora_opcion = int(hora_opcion[0:2])
 
+        #Comprueba si la fecha está disponible
         bd.execute("SELECT ocupacion FROM aforo WHERE localizacion=? and hora = ? and fecha= ?",
                    (st.session_state["restaurante"], hora_opcion, fecha))
         aforo = bd.fetchall()
@@ -66,13 +71,16 @@ def reserva():
             res_opcion = st.button("Confirma tu reserva: ")
 
             if res_opcion:
+                #Cifrado - Autenticado
 
+                # Se utiliza el algoritmo chacha con la clave derivada y el salt_clave para poder desencriptar los datos
                 chacha = ChaCha20Poly1305(st.session_state["contrasena"])
 
+                #Se encriptan los datos de fecha y hora
                 ct_f, non_f = chacha_encri(chacha, fecha)
                 ct_h, non_h = chacha_encri(chacha, hora_opcion)
 
-
+                #Se codifican los datos para guardarlos en la base de datos
                 ct_h = codificar(ct_h)
                 ct_f = codificar(ct_f)
                 non_f = codificar(non_f)
@@ -81,8 +89,9 @@ def reserva():
 
                 st.write("Reserva confirmada")
 
-                bd.execute("INSERT INTO reservas VALUES(?,?,?,?,?,?,?,?)",
-                           (st.session_state["usuario"], ct_r, non_r,
+                #Se guardan los datos en la base de datos
+                bd.execute("INSERT INTO reservas VALUES(?,?,?,?,?,?,?)",
+                           (st.session_state["usuario"], st.session_state["restaurante"],
                             ct_h, non_h,ct_f,non_f, pers_opcion))
 
                 base.commit()
