@@ -73,7 +73,8 @@ def reserva():
             if res_opcion:
                 #Cifrado - Autenticado
 
-                # Se utiliza el algoritmo chacha con la clave derivada y el salt_clave para poder desencriptar los datos
+                # Se utiliza el algoritmo ChaCha20Poly1305 con la clave derivada
+                # Se obtiene el objeto chacha con el que se cifrará
                 chacha = ChaCha20Poly1305(st.session_state["contrasena"])
 
                 #Se encriptan los datos de fecha y hora

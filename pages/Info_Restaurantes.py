@@ -1,6 +1,6 @@
 from Inicio_Sesion import  *
 
-#Página para ver la información del restaurante
+#Página con la información del restaurante
 def info_restaurante():
     base, bd = Abrir_bd()
     st.title("Página de información")
@@ -20,13 +20,13 @@ def info_restaurante():
     datos = bd.fetchall()
     tel, val, hor_i, hor_c = datos[0][0], datos[0][1], datos[0][2], datos[0][3]
 
-    #Se imprime por pantalla los datos del restaurante seleccionado
+    #Se imprimen por pantalla los datos del restaurante seleccionado
     st.write("Teléfono:", str(tel))
     st.write("Valoración: ", str(val))
     st.write("Hora de apertura: ", str(hor_i))
     st.write("Hora de cierre: ", str(hor_c))
 
-    #Da la opción de poder reservar en el restaurante elegido
+    #Se ofrece la opción de poder reservar en el restaurante elegido
     reserva = st.button("Reservar")
     if reserva:
         st.session_state["restaurante"] = rest_elegido

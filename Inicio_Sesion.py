@@ -4,22 +4,22 @@ from streamlit_extras.switch_page_button import switch_page
 from criptografia import  *
 
 
-#Archivo donde se inicia el programa. Parte donde se inicia sesión
+#Archivo donde se inicia el programa. Módulo de inicio de sesión
 def Inicio_Sesion():
     base, bd = Abrir_bd()
 
-    #Usuario introduce su usuario y su contrasena
+    #Input para que el usuario introduzca su nombre usuario y su contraseña
     usuario = st.text_input('Introduzca su usuario:')
     contrasena = st.text_input('Introduce su contraseña:', type="password")
 
-    #Botones para iniciar sesion u ir a crear tu cuenta
+    #Botones para iniciar sesión o ir a crear una cuenta
     login = st.button("Inicio Sesion")
     crear_usuario = st.button("Crea tu cuenta")
 
     if crear_usuario:
         switch_page("Crear_Usuario")
     if login:
-        # En la base de datos se busca por el nombre de usuario para obtener el token de la contraseña
+        # En la base de datos se busca por el nombre de usuario para obtener el token y los salts
         bd.execute("SELECT contraseña, salt_contr, salt_clave FROM user WHERE usuario=?",
                    (usuario,))
         true_cont = bd.fetchall()
@@ -30,7 +30,7 @@ def Inicio_Sesion():
         else:
             key, salt, salt_clave = true_cont[0][0], true_cont[0][1],true_cont[0][2]
 
-            # Autentificacion de contraseñas por scrypt
+            # Autentificación de contraseñas por scrypt
 
             #Se decodifican los datos obtenidos de la base de datos
             salt = decodificar(salt)
@@ -39,7 +39,6 @@ def Inicio_Sesion():
 
             # Se usa el algoritmo scrypt para comprobar si la contraseña es igual a la dada
             kdf = kdf_crear(salt)
-
             try :
                 kdf.verify(bytes(contrasena, 'ascii'), key)
             except:

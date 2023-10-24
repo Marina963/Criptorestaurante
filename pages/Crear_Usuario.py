@@ -2,15 +2,15 @@ import re
 from  Inicio_Sesion import  *
 import os
 
-#Archivo para crear el usuario
+#Archivo que crea el usuario
 
 def Crear_Usuario():
     base, bd = Abrir_bd()
 
-    #Usuario introduce su nombre
+    #Input para que el usuario introduzca su nombre
     usuario = st.text_input('Introduce su nuevo nombre de usuario:')
 
-    #Se busca en la base de datos para ver si ya existe en nombre de usuario que ha puesto
+    #Se busca en la base de datos para ver si ya existe en nombre de usuario que ha introducido
     bd.execute("SELECT usuario FROM user WHERE usuario=?", (usuario,))
     usua = bd.fetchall()
 
@@ -52,8 +52,9 @@ def Crear_Usuario():
                         if reg:
                             #Autentificacion de contraseñas por scrypt
 
-                            #Se crea un salt que se usa en la función scrypt y después se deriva la contraseña
-                            # Se crea el token y se guarda en la base de datos
+                            #Se crea un salt que se usa en la función scrypt
+                            #Después se deriva la contraseña
+                            #Se crea el token y se guarda en la base de datos
                             salt = os.urandom(16)
                             kdf = kdf_crear(salt)
                             key = kdf.derive(contrasena.encode('ascii'))

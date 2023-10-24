@@ -1,13 +1,11 @@
-from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+import os
 import base64
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import os
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-
-#Archido donde están todos los métodos de criptografía
-
+#Archivo con todos los métodos de criptografía
 
 def decodificar(key):
     key = bytes(key, 'ascii')
@@ -31,7 +29,7 @@ def kdf_crear(salt):
     )
     return kdf
 
-#Método para generar una clave, para poder encriptar los datos
+#Método para generar una clave usada para cifrar los datos
 def pbk(salt_clave):
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
@@ -41,7 +39,7 @@ def pbk(salt_clave):
     )
     return kdf
 
-#Metodo para poder encriptar los datos, con el algoritmo chacha
+#Metodo para cifrar y autenticar los datos con el algoritmo ChaCha20Poly1305
 def chacha_encri(chacha, fecha):
     fecha = str(fecha)
     data = bytes(fecha.encode('ascii'))
@@ -50,7 +48,7 @@ def chacha_encri(chacha, fecha):
     return ct, nonce
 
 
-#Metodo para derivar la contraseña original, para poder cifrar los datos
+#Metodo para derivar la contraseña original usada para cifrar los datos
 def key_derive(contrasena, salt_clave):
     kdf = pbk(salt_clave)
     key = kdf.derive(contrasena.encode('ascii'))
