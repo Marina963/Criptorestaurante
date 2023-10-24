@@ -40,9 +40,9 @@ def pbk(salt_clave):
     return kdf
 
 #Metodo para cifrar y autenticar los datos con el algoritmo ChaCha20Poly1305
-def chacha_encri(chacha, fecha):
-    fecha = str(fecha)
-    data = bytes(fecha.encode('ascii'))
+def chacha_encri(chacha, dato):
+    dato = str(dato)
+    data = bytes(dato.encode('ascii'))
     nonce = os.urandom(12)
     ct = chacha.encrypt(nonce, data, None)
     return ct, nonce
