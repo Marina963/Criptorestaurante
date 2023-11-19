@@ -51,8 +51,7 @@ def reserva():
                 st.write("Aforo completo")
             else:
                 n_per = aforo_r[0][0] - pers_opcion
-                bd.execute("INSERT INTO aforo VALUES(?,?,?,?)",
-                           (st.session_state["restaurante"], fecha, hora_opcion, n_per))
+                bd.execute("INSERT INTO aforo VALUES(?,?,?,?)", (st.session_state["restaurante"], fecha, hora_opcion, n_per))
                 disponible = True
 
         elif aforo[0][0] <= 0:
@@ -89,7 +88,81 @@ def reserva():
                 non_f = codificar(non_f)
                 non_h = codificar(non_h)
 
+                # Loading
+                with open("./clave_privada.txt", "rb") as key_file:
+                    private_key = serialization.load_pem_private_key(
+                        key_file.read(),
+                        password=None,
+                    )
+                key_file.close()
 
+                #Firmar
+                texto = "La fecha seria: " + str(fecha) + " a las " + str(hora_opcion) + ":00 " + "para " + str(
+                    pers_opcion) + " personas en el restaurante: " + str(st.session_state["restaurante"])
+                mensaje = bytes(texto, 'ascii')
+
+                with open("../mensaje.txt", "wb") as key_file:
+                    key_file.write(mensaje)
+                key_file.close()
+                mesaje = None
+
+                with open("../mensaje.txt", "rb") as key_file:
+                    message = key_file.read()
+                key_file.close()
+                signature = private_key.sign(
+                    message,
+                    padding.PSS(
+                        mgf=padding.MGF1(hashes.SHA256()),
+                        salt_length=padding.PSS.MAX_LENGTH
+                    ),
+                    hashes.SHA256()
+                )
+                with open("../mensaje_firmado.txt", "wb") as key_file:
+                    key_file.write(signature)
+                key_file.close()
+                private_key = None
+                message = None
+                with open("../mensaje.txt", "rb") as key_file:
+                    message = key_file.read()
+                key_file.close()
+                st.write(message)
+                st.write("Tu mensaje esta firmado")
+                time.sleep(10)
+
+
+                # Verificacion
+                # Loading
+                with open("./clave_privada.txt", "rb") as key_file:
+                    private_key = serialization.load_pem_private_key(
+                        key_file.read(),
+                        password=None,
+                    )
+                key_file.close()
+                with open("../mensaje.txt", "rb") as key_file:
+                    messag = key_file.read()
+                key_file.close()
+                with open("../mensaje_firmado.txt", "rb") as key_file:
+                    signatur = key_file.read()
+                key_file.close()
+
+                public_key = private_key.public_key()
+
+                try:
+                    public_key.verify(
+                        signatur,
+                        messag,
+                        padding.PSS(
+                            mgf=padding.MGF1(hashes.SHA256()),
+                            salt_length=padding.PSS.MAX_LENGTH
+                        ),
+                        hashes.SHA256()
+                    )
+                except:
+                    st.write("archivo modificado")
+                    return
+
+                st.write("Tu mensaje esta verificado")
+                time.sleep(10)
                 st.write("Reserva confirmada")
 
                 #Se guardan los datos en la base de datos

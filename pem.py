@@ -17,7 +17,11 @@ pem = private_key.private_bytes(
    encryption_algorithm=serialization.BestAvailableEncryption(bytes(contrasena))
 )
 pem.splitlines()[0]
-
+with open("./clave_privada.txt", "wb") as key_file:
+    for i in range(len(pem.splitlines())):
+        key_file.write(pem.splitlines()[i])
+        key_file.write(bytes('\n', 'ascii'))
+key_file.close()
 #Serializacion clave publica
 public_key = private_key.public_key()
 pem = public_key.public_bytes(
