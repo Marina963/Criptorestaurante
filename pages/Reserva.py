@@ -1,5 +1,7 @@
 from Inicio_Sesion import *
 import datetime
+import time
+
 
 #Paguina que permite hacer una reserva al usuario
 def reserva():
@@ -101,10 +103,6 @@ def reserva():
 
 
     base.close()
-
-
-
-
 
 if __name__ == "__main__":
     reserva()

@@ -3,7 +3,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-contrasena = 12345
+contrasena = 12
+
 #Generacion clave privada
 private_key = rsa.generate_private_key(
     public_exponent=65537,
@@ -24,33 +25,9 @@ pem = public_key.public_bytes(
    format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
 pem.splitlines()[0]
+with open("./clave_publica.txt", "wb") as key_file:
+    for i in range(len(pem.splitlines())):
+        key_file.write(pem.splitlines()[i])
+        key_file.write(bytes('\n', 'ascii'))
+key_file.close()
 
-#Loading
-with open("path/to/key.pem", "rb") as key_file:
-    private_key = serialization.load_pem_private_key(
-        key_file.read(),
-        password=None,
-    )
-
-#Firmar
-message = b"A message I want to sign"
-signature = private_key.sign(
-    message,
-    padding.PSS(
-        mgf=padding.MGF1(hashes.SHA256()),
-        salt_length=padding.PSS.MAX_LENGTH
-    ),
-    hashes.SHA256()
-)
-
-#Verificacion
-public_key = private_key.public_key()
-public_key.verify(
-    signature,
-    message,
-    padding.PSS(
-        mgf=padding.MGF1(hashes.SHA256()),
-        salt_length=padding.PSS.MAX_LENGTH
-    ),
-    hashes.SHA256()
-)
