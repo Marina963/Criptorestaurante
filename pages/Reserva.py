@@ -1,6 +1,11 @@
 from Inicio_Sesion import *
 import datetime
 import time
+from cryptography import x509
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+import os
 
 
 #Paguina que permite hacer una reserva al usuario
@@ -89,7 +94,7 @@ def reserva():
                 non_h = codificar(non_h)
 
                 # Carga clave privada
-                with open("clave_privada.pem", "rb") as key_file:
+                with open("certificados_firmas/clave_privada.pem", "rb") as key_file:
                     private_key = serialization.load_pem_private_key(
                         key_file.read(),password=bytes(os.getenv("passw_restaurante"), 'ascii'),)
                 key_file.close()
@@ -98,12 +103,12 @@ def reserva():
                 texto = "La fecha seria: " + str(fecha) + " a las " + str(hora_opcion) + ":00 " + "para " + str(
                     pers_opcion) + " personas en el restaurante: " + str(st.session_state["restaurante"])
                 mensaje = bytes(texto, 'ascii')
-                nombre = str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + ".txt"
-                nombre_firma = str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + "_firmado.txt"
+                nombre =  "Mensajes_firma/" + str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + ".txt"
+                nombre_firma = "Mensajes_firma/" + str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + "_firmado.txt"
                 with open(nombre, "wb") as key_file:
                     key_file.write(mensaje)
                 key_file.close()
-                mesaje = None
+                mensaje = None
 
                 #Leer el mensaje
                 with open(nombre, "rb") as key_file:
@@ -127,7 +132,7 @@ def reserva():
                 st.write("Tu mensaje esta firmado")
                 time.sleep(5)
 
-                #private_key = None
+                private_key = None
                 message = None
 
                 # Verificacion de la firma y los certificados
@@ -140,10 +145,10 @@ def reserva():
                     signatur = key_file.read()
                 key_file.close()
 
-                with open("cert.pem", "rb") as key_file:
+                with open("certificados_firmas/cert.pem", "rb") as key_file:
                     pem_data = key_file.read()
                 key_file.close()
-                with open("ac1cert.pem", "rb") as key_file:
+                with open("certificados_firmas/ac1cert.pem", "rb") as key_file:
                     pem_AC = key_file.read()
                 key_file.close()
 
@@ -174,8 +179,7 @@ def reserva():
                     return
 
                 #Verificacion de la firma
-                public_key = private_key.public_key()
-                #public_key = cert.public_key()
+                public_key = cert.public_key()
                 try:
                     public_key.verify(
                         signatur,

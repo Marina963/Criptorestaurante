@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.asymmetric import padding
 import os
 
-with open("./clave_privada.pem", "rb") as key_file:
+with open("certificados_firmas/clave_privada.pem", "rb") as key_file:
     key = serialization.load_pem_private_key(
         key_file.read(), password=bytes(os.getenv("passw_restaurante"), 'ascii'),)
 key_file.close()
@@ -29,7 +29,7 @@ csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
 ).sign(key, hashes.SHA256())
 
 # Escribir el CSR en un pem
-with open("csr.pem", "wb") as f:
+with open("certificados_firmas/csr.pem", "wb") as f:
     f.write(csr.public_bytes(serialization.Encoding.PEM))
 f.close()
 

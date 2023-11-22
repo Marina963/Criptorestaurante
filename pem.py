@@ -15,8 +15,7 @@ pem = private_key.private_bytes(
    format=serialization.PrivateFormat.PKCS8,
    encryption_algorithm=serialization.BestAvailableEncryption(bytes(os.getenv("passw_restaurante"), 'ascii'))
 )
-
-with open("./clave_privada.pem", "wb") as key_file:
+with open("certificados_firmas/clave_privada.pem", "wb") as key_file:
     key_file.write(pem)
 
 key_file.close()
@@ -30,7 +29,7 @@ pem = public_key.public_bytes(
    format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
 
-with open("./clave_publica.pem", "wb") as key_file:
+with open("certificados_firmas/clave_publica.pem", "wb") as key_file:
     key_file.write(pem)
 
 key_file.close()
