@@ -88,81 +88,106 @@ def reserva():
                 non_f = codificar(non_f)
                 non_h = codificar(non_h)
 
-                # Loading
-                with open("./clave_privada.txt", "rb") as key_file:
+                # Carga clave privada
+                with open("clave_privada.pem", "rb") as key_file:
                     private_key = serialization.load_pem_private_key(
-                        key_file.read(),
-                        password=None,
-                    )
+                        key_file.read(),password=bytes(os.getenv("passw_restaurante"), 'ascii'),)
                 key_file.close()
 
-                #Firmar
+                # Escribir mensaje
                 texto = "La fecha seria: " + str(fecha) + " a las " + str(hora_opcion) + ":00 " + "para " + str(
                     pers_opcion) + " personas en el restaurante: " + str(st.session_state["restaurante"])
                 mensaje = bytes(texto, 'ascii')
-
-                with open("../mensaje.txt", "wb") as key_file:
+                nombre = str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + ".txt"
+                nombre_firma = str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + "_firmado.txt"
+                with open(nombre, "wb") as key_file:
                     key_file.write(mensaje)
                 key_file.close()
                 mesaje = None
 
-                with open("../mensaje.txt", "rb") as key_file:
-                    message = key_file.read()
-                key_file.close()
-                signature = private_key.sign(
-                    message,
-                    padding.PSS(
-                        mgf=padding.MGF1(hashes.SHA256()),
-                        salt_length=padding.PSS.MAX_LENGTH
-                    ),
-                    hashes.SHA256()
-                )
-                with open("../mensaje_firmado.txt", "wb") as key_file:
-                    key_file.write(signature)
-                key_file.close()
-                private_key = None
-                message = None
-                with open("../mensaje.txt", "rb") as key_file:
+                #Leer el mensaje
+                with open(nombre, "rb") as key_file:
                     message = key_file.read()
                 key_file.close()
                 st.write(message)
-                st.write("Tu mensaje esta firmado")
-                time.sleep(10)
 
+                #Firma del mensaje
+                signature = private_key.sign(
+                    message,
+                    padding.PKCS1v15(),
+                    hashes.SHA1())
 
-                # Verificacion
-                # Loading
-                with open("./clave_privada.txt", "rb") as key_file:
-                    private_key = serialization.load_pem_private_key(
-                        key_file.read(),
-                        password=None,
-                    )
+                with open(nombre_firma, "wb") as key_file:
+                    key_file.write(signature)
                 key_file.close()
-                with open("../mensaje.txt", "rb") as key_file:
+
+                with open(nombre, "rb") as key_file:
+                    message = key_file.read()
+                key_file.close()
+                st.write("Tu mensaje esta firmado")
+                time.sleep(5)
+
+                #private_key = None
+                message = None
+
+                # Verificacion de la firma y los certificados
+                #st.write(nombre)
+                with open(nombre, "rb") as key_file:
                     messag = key_file.read()
                 key_file.close()
-                with open("../mensaje_firmado.txt", "rb") as key_file:
+
+                with open(nombre_firma, "rb") as key_file:
                     signatur = key_file.read()
                 key_file.close()
 
-                public_key = private_key.public_key()
+                with open("cert.pem", "rb") as key_file:
+                    pem_data = key_file.read()
+                key_file.close()
+                with open("ac1cert.pem", "rb") as key_file:
+                    pem_AC = key_file.read()
+                key_file.close()
 
+                cert = x509.load_pem_x509_certificate(pem_data)
+                certAc = x509.load_pem_x509_certificate(pem_AC)
+                public_key_Ac = certAc.public_key()
+
+                #Verificacion del certificado raiz AC
+                try:
+                    public_key_Ac.verify(
+                        certAc.signature,
+                        certAc.tbs_certificate_bytes,
+                        padding.PKCS1v15(),
+                        certAc.signature_hash_algorithm,)
+                except:
+                    print("Certificado AC no valido")
+                    return
+
+                # Verificacion del certificado CSR
+                try:
+                    public_key_Ac.verify(
+                        cert.signature,
+                        cert.tbs_certificate_bytes,
+                        padding.PKCS1v15(),
+                        cert.signature_hash_algorithm,)
+                except:
+                    print("Certificado A no valido")
+                    return
+
+                #Verificacion de la firma
+                public_key = private_key.public_key()
+                #public_key = cert.public_key()
                 try:
                     public_key.verify(
                         signatur,
                         messag,
-                        padding.PSS(
-                            mgf=padding.MGF1(hashes.SHA256()),
-                            salt_length=padding.PSS.MAX_LENGTH
-                        ),
-                        hashes.SHA256()
-                    )
+                        padding.PKCS1v15(),
+                        hashes.SHA1())
                 except:
-                    st.write("archivo modificado")
+                    st.write("Archivo modificado")
                     return
 
-                st.write("Tu mensaje esta verificado")
-                time.sleep(10)
+                st.write("La firma y los certificados estan verificados")
+                time.sleep(5)
                 st.write("Reserva confirmada")
 
                 #Se guardan los datos en la base de datos
@@ -172,8 +197,6 @@ def reserva():
 
                 base.commit()
                 switch_page("Info_Restaurantes")
-
-
 
     base.close()
 

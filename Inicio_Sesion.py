@@ -3,6 +3,7 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 from criptografia import  *
 from pem import *
+from certificado import  *
 
 #Archivo donde se inicia el programa. Módulo de inicio de sesión
 def Inicio_Sesion():
@@ -65,8 +66,8 @@ if __name__ == "__main__":
 
     #Metodos para crear de nuevo las bases de datos
     #borrar_tablas()
-    #Crear_tablas()
-    #insertar_restaurantes()
+    Crear_tablas()
+    insertar_restaurantes()
 
     #Inicio del programa
     Inicio_Sesion()

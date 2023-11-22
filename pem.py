@@ -2,8 +2,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import rsa
-
-contrasena = 12
+import os
 
 #Generacion clave privada
 private_key = rsa.generate_private_key(
@@ -14,24 +13,25 @@ private_key = rsa.generate_private_key(
 pem = private_key.private_bytes(
    encoding=serialization.Encoding.PEM,
    format=serialization.PrivateFormat.PKCS8,
-   encryption_algorithm=serialization.BestAvailableEncryption(bytes(contrasena))
+   encryption_algorithm=serialization.BestAvailableEncryption(bytes(os.getenv("passw_restaurante"), 'ascii'))
 )
-pem.splitlines()[0]
-with open("./clave_privada.txt", "wb") as key_file:
-    for i in range(len(pem.splitlines())):
-        key_file.write(pem.splitlines()[i])
-        key_file.write(bytes('\n', 'ascii'))
+
+with open("./clave_privada.pem", "wb") as key_file:
+    key_file.write(pem)
+
 key_file.close()
-#Serializacion clave publica
+
+#Creacion clave publica
 public_key = private_key.public_key()
+
+#Serializacion clave publica
 pem = public_key.public_bytes(
    encoding=serialization.Encoding.PEM,
    format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
-pem.splitlines()[0]
-with open("./clave_publica.txt", "wb") as key_file:
-    for i in range(len(pem.splitlines())):
-        key_file.write(pem.splitlines()[i])
-        key_file.write(bytes('\n', 'ascii'))
+
+with open("./clave_publica.pem", "wb") as key_file:
+    key_file.write(pem)
+
 key_file.close()
 
