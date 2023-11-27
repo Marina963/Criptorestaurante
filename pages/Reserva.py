@@ -99,36 +99,32 @@ def reserva():
                         key_file.read(),password=bytes(os.getenv("passw_restaurante"), 'ascii'),)
                 key_file.close()
 
-                # Escribir mensaje
+                #Escribir mensaje
                 texto = "La fecha seria: " + str(fecha) + " a las " + str(hora_opcion) + ":00 " + "para " + str(
                     pers_opcion) + " personas en el restaurante: " + str(st.session_state["restaurante"])
                 mensaje = bytes(texto, 'ascii')
-                nombre =  "Mensajes_firma/" + str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + ".txt"
-                nombre_firma = "Mensajes_firma/" + str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + "_firmado.txt"
-                with open(nombre, "wb") as key_file:
-                    key_file.write(mensaje)
-                key_file.close()
-                mensaje = None
 
-                #Leer el mensaje
-                with open(nombre, "rb") as key_file:
-                    message = key_file.read()
-                key_file.close()
-                st.write(message)
+                #Se crea nombre ficheros
+                fichero_mensaje = "Mensajes_firma/" + str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + ".txt"
+                fichero_firma = "Mensajes_firma/" + str(fecha) + "_" + str(hora_opcion) + "_" + str(st.session_state["usuario"]) + "_firma.txt"
+
 
                 #Firma del mensaje
                 signature = private_key.sign(
-                    message,
+                    mensaje,
                     padding.PKCS1v15(),
                     hashes.SHA1())
 
-                with open(nombre_firma, "wb") as key_file:
+                # Se escribe el mensaje y la firma
+                with open(fichero_mensaje, "wb") as key_file:
+                    key_file.write(mensaje)
+                key_file.close()
+                st.write(str(mensaje))
+
+                with open(fichero_firma, "wb") as key_file:
                     key_file.write(signature)
                 key_file.close()
 
-                with open(nombre, "rb") as key_file:
-                    message = key_file.read()
-                key_file.close()
                 st.write("Tu mensaje esta firmado")
                 time.sleep(5)
 
@@ -136,12 +132,11 @@ def reserva():
                 message = None
 
                 # Verificacion de la firma y los certificados
-                #st.write(nombre)
-                with open(nombre, "rb") as key_file:
+                with open(fichero_mensaje, "rb") as key_file:
                     messag = key_file.read()
                 key_file.close()
 
-                with open(nombre_firma, "rb") as key_file:
+                with open(fichero_firma, "rb") as key_file:
                     signatur = key_file.read()
                 key_file.close()
 
